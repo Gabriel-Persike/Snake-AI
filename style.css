@@ -3,3 +3,12 @@
     height: 200px;
     width: 200px;
 }
+
+.btn{
+    padding: 10px 20px;
+    cursor: pointer;
+}
+
+/* #statusIA{
+    background-color: green;
+} */
