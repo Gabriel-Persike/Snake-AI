@@ -101,7 +101,7 @@ function bindings() {
 
 function startStop() {
 	if (intervalClock == null) {
-		intervalClock = setInterval(clock, 1);
+		intervalClock = setInterval(clock, $("#clockTime").val());
 	} else {
 		clearInterval(intervalClock);
 		intervalClock = null;
