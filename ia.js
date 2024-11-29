@@ -1,3 +1,4 @@
+let perc = null;
 class Perceptron {
 	constructor(inputSize, outputSize) {
 		// Initialize weights randomly
@@ -45,12 +46,12 @@ class Perceptron {
 				// Update weights and biases
 				for (let j = 0; j < this.weights.length; j++) {
 					for (let k = 0; k < this.weights[j].length; k++) {
-						this.weights[j][k] += learningRate *( error[k] * inputVector[j]);
+						this.weights[j][k] += learningRate * (error[k] * inputVector[j]);
 					}
-					this.bias[j] += (learningRate/10) * error[j];
+					this.bias[j] += (learningRate / 10) * error[j];
 				}
 			}
-		} 
+		}
 	}
 }
 function shuffle(array) {
@@ -60,104 +61,6 @@ function shuffle(array) {
 	}
 	return array;
 }
-
-let perc = new Perceptron(2, 4); // 8 inputs (features), 4 outputs (directions)
-
-var data = {
-	inputs: shuffle([
-		[1, -1],
-		[-1, 1],
-		[1, 0],
-		[-1, -1],
-		[1, 1], // 5
-		[-1, 0],
-		[1, 1],
-		[-1, -1],
-		[1, 1],
-		[-1, 0],
-		[1, 1],
-		[-1, -1],
-		[1, 0],
-		[-1, 1],
-		[1, 0],
-		[-1, 1],
-		[1, 1],
-		[-1, 0],
-		[1, -1],
-		[-1, 1],
-		[1, 0],
-		[-1, 1],
-		[1, 0],
-		[-1, -1],
-		[1, 0],
-		[-1, 1],
-		[1, -1],
-		[-1, 0],
-		[1, 1],
-		[-1, -1],
-		[1, 0],
-		[-1, 0],
-		[1, 0],
-		[-1, 1],
-		[-1, -1],
-		[-1, -1],
-		[1, 1],
-		[-1, 1],
-		[1, -1],
-		[-1, 1],
-		[1, 1],
-		[-1, 1],
-		[1, -1],
-		[1, 1],
-		[-1, -1],
-		[1, 1],
-		[-1, 1],
-		[1, -1],
-		[-1, 1],
-		[1, 1],
-		[0, -1],
-		[0, 1],
-		[0, -1],
-		[0, -1],
-		[0, 1],
-		[0, -1],
-		[0, -1],
-		[0, 1],
-		[0, -1],
-		[0, 1],
-		[0, -1],
-		[0, 1],
-		[0, -1],
-		[0, 1],
-		[0, 1],
-		[0, 1],
-		[0, 1],
-		[0, 1],
-		[0, -1],
-		[0, 1],
-		[0, -1],
-		[0, 1],
-		[0, 1],
-		[0, 1],
-		[0, 1],
-		[-1, 1],
-		[1, 1],
-		[0, 1],
-		[1, 1],
-		[0, -1],
-	]),
-};
-data.outputs = getOutputs(data.inputs);
-
-perc.train(data.inputs, data.outputs, 0.00001, 1000000);
-console.log("end train");
-
-let inputVector = [player.x - food.x, player.y - food.y]; // Get the input vector
-
-let action = perc.predict(inputVector); // Get the next move from the perceptron
-
-// trainer.train();
-
 function getOutputs(inputs) {
 	var outputs = [];
 	for (const input of inputs) {
@@ -173,4 +76,24 @@ function getOutputs(inputs) {
 	}
 
 	return outputs;
+}
+function StartPerceptron(){
+    let perc = new Perceptron(2, 4); // 8 inputs (features), 4 outputs (directions)
+    var data = {
+        inputs: shuffle([
+            [1, 0],
+            [1, 1],
+            [1, -1],
+            [-1, 0],
+            [-1, 1],
+            [-1, -1],
+            [0, 1],
+            [0, -1],
+        ]),
+    };
+    data.outputs = getOutputs(data.inputs);
+
+    perc.train(data.inputs, data.outputs, 0.00001, 1000000);
+    console.log("end train");
+    
 }

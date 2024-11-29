@@ -3,6 +3,8 @@ var map = {
 	y: 200,
 };
 
+var highest = 0;
+var highestMoves = 0;
 var player = {
 	points: 0,
 	x: 50,
@@ -26,10 +28,44 @@ var IAActive = true;
 
 var intervalClock = null;
 
-$(document).ready(function () {
-	bindings();
-    $("#statusIA").text(IAActive ? "Ativado" : "Desativado");
+function IAQlearning() {
+	var state = getState();
+	var action = PerceptronQLearning.chooseAction(state);
 
+	if (action == "up") {
+		player.direction = "up";
+	} else if (action == "down") {
+		player.direction = "down";
+	} else if (action == "left") {
+		player.direction = "left";
+	} else if (action == "right") {
+		player.direction = "right";
+	}
+
+	return {state, action};
+}
+function nextState(state, action, colision, gotFood){
+	var nextState = getState();
+
+	var reward = 0;
+	if (gotFood) {
+		reward = 1;
+	}
+	else{
+		reward = -0.00001
+	}
+
+	if (colision) {
+		reward = -1;
+	}
+
+	PerceptronQLearning.updateQValue(state, action, reward, nextState);
+}
+
+$(document).ready(function () {
+	StartQLearning();
+	bindings();
+	$("#statusIA").text(IAActive ? "Ativado" : "Desativado");
 });
 
 function bindings() {
@@ -59,29 +95,26 @@ function bindings() {
 
 	$("#btnStartStopIA").on("click", function () {
 		IAActive = !IAActive;
-
 		$("#statusIA").text(IAActive ? "Ativado" : "Desativado");
 	});
 }
 
 function startStop() {
 	if (intervalClock == null) {
-		intervalClock = setInterval(clock, 100);
+		intervalClock = setInterval(clock, 1);
 	} else {
 		clearInterval(intervalClock);
 		intervalClock = null;
 	}
 }
 
-function IA() {
-    var x = (player.x - food.x);
-    x = x < 0 ? -1 : x > 0 ? 1 : 0;
-    var y = player.y - food.y;
-    y = y < 0 ? -1 : y > 0 ? 1 : 0;
+function IALinearRegretion() {
+	var x = player.x - food.x;
+	x = x < 0 ? -1 : x > 0 ? 1 : 0;
+	var y = player.y - food.y;
+	y = y < 0 ? -1 : y > 0 ? 1 : 0;
 
-
-	var predict = perc.predict([x,y]);
-	console.log(predict);
+	var predict = perc.predict([x, y]);
 	var direction = "";
 
 	if (predict[1] == 1) {
@@ -94,27 +127,112 @@ function IA() {
 		direction = "right";
 	}
 
-	console.log(direction + " " + [player.x - food.x, player.y - food.y]);
 	if (direction) {
 		player.direction = direction;
 	}
 }
 
 function clock() {
+	var state = null;
+	var action = null;
 	if (IAActive) {
-		IA();
+		var retorno = IAQlearning();
+		state = getState();
+		action = retorno.action;
 	}
 	move();
-	checkFood();
+	var gotFood = checkFood();
+	var colision = checkColision();
+	if (action) {
+		nextState(state, action, colision, gotFood);
+	}
+	player.moves++;
 	draw();
+
 }
+
+function getState(){
+	var x = player.x - food.x;
+	x = x < 0 ? -1 : x > 0 ? 1 : 0;
+	var y = player.y - food.y;
+	y = y < 0 ? -1 : y > 0 ? 1 : 0;
+
+	var Mapx = player.x >= (map.x - 10) ? 1 : map.x - player.x >= (map.x - 10) ? -1 : 0;
+	var Mapy = player.y >= (map.y - 10) ? 1 : map.y - player.y >= (map.y-10)  ? -1 : 0;
+
+	var nextState = [
+		x,y,
+		Mapx,
+		Mapy
+	];
+
+	return nextState.join(",");
+}
+
 function checkFood() {
 	if (player.x == food.x && player.y == food.y) {
 		player.points++;
 		// $("#points").html(player.points);
 		addPixel();
-		food.x = Math.floor((Math.random() * (map.x - 10) + 10) / 10) * 10;
-		food.y = Math.floor((Math.random() * (map.y - 10) + 10) / 10) * 10;
+
+		var list = getUnOcupiedPixels();
+		var random = Math.floor(Math.random() * list.length);
+
+		food.x = list[random].x;
+		food.y = list[random].y;
+		return true;
+	}
+
+	function getUnOcupiedPixels() {
+		var pixels = [];
+		for (let i = 30; i < map.x - 30; i += 10) {
+			for (let j = 30; j < map.y -30; j += 10) {
+				var ocupied = false;
+				for (const pixel of player.body) {
+					if (pixel.x == i && pixel.y == j) {
+						ocupied = true;
+						break;
+					}
+				}
+				if (!ocupied) {
+					pixels.push({ x: i, y: j });
+				}
+			}
+		}
+		return pixels;
+	}
+}
+function checkColision(){
+	if (player.x < 0 || player.x >= map.x || player.y < 0 || player.y >= map.y) {
+		// clearInterval(intervalClock);
+		// intervalClock = null;
+		// alert("Game Over");
+	
+		if (highest < player.points) {
+			highest = player.points;
+			$("#textHigh").html(highest);			
+		}
+
+		if (player.moves > highestMoves) {
+			$("#textHighMoves").text(player.moves);
+			highestMoves = player.moves;
+		}
+
+		player = {
+			points: 0,
+			x: 50,
+			y: 100,
+			direction: "right",
+			moves:0,
+			body: [
+				{
+					id: 0,
+					x: 50,
+					y: 100,
+				},
+			],
+		};
+		return true;
 	}
 }
 function addPixel() {
@@ -170,4 +288,3 @@ function compareArrays(arr1, arr2) {
 	}
 	return true;
 }
-
