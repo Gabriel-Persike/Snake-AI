@@ -22,7 +22,7 @@ class QLearningAgent {
             var maxQ = this.qTable[state];
             if (maxQ && maxQ != {}) {
 			    var maxQ = Math.max(...Object.values(this.qTable[state]));
-                if (maxQ > -2 && maxQ<2) {
+                if (true) {
                     if (Math.random() < this.epsilon) {
                         return this.actions[Math.floor(Math.random() * this.actions.length)];
                     }
@@ -52,14 +52,17 @@ class QLearningAgent {
             qValue = 0;   
             if(!this.qTable[state])
             this.qTable[state] = {};
-            this.qTable[state][action] = 0;
+
+            // for (const action of this.actions) {
+                this.qTable[state][action] = 0;
+            // }
         }
         else{
             qValue = this.qTable[state][action];
         }
     
         var newValue = this.alpha * (reward + this.gamma * maxQNext - qValue);
-        if (reward <= 1) {
+        if (reward <= -1) {
             console.error(state, action, this.alpha, reward, this.gamma, maxQNext, qValue, newValue);
         }
         else if(reward>=1){
@@ -86,5 +89,5 @@ class QLearningAgent {
 function StartQLearning() {
 	var states = [player.x - food.x, player.y - food.y, map.x - player.x, map.y - player.y];
 
-	PerceptronQLearning = new QLearningAgent(states, ["up", "down", "left", "right"], 0.2, 0.2, 0.5);
+	PerceptronQLearning = new QLearningAgent(states, ["up", "down", "left", "right"], 0.3, 0.2, 0.3);
 }

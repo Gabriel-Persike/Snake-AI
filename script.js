@@ -17,11 +17,11 @@ var player = {
 			y: 100,
 		},
 	],
-};
+};	
 
 var food = {
-	x: 150,
-	y: 150,
+	x: 70,
+	y: 120,
 };
 
 var IAActive = true;
@@ -49,11 +49,11 @@ function nextState(state, action, colision, gotFood){
 
 	var reward = 0;
 	if (gotFood) {
-		reward = 1;
+		reward = 10;
 	}
-	else{
-		reward = -0.00001
-	}
+	// else{
+	// 	reward = -0.00000001;
+	// }
 
 	if (colision) {
 		reward = -1;
