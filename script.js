@@ -50,10 +50,14 @@ function nextState(state, action, colision, gotFood){
 	var reward = 0;
 	if (gotFood) {
 		reward = 10;
+		PerceptronQLearning.epsilon *= 0.6;
 	}
-	// else{
-	// 	reward = -0.00000001;
-	// }
+	else{
+		// reward = -0.000000000000001;
+		if (PerceptronQLearning.epsilon < 1)  {
+			PerceptronQLearning.epsilon *= 1.001; 
+		}
+	}
 
 	if (colision) {
 		reward = -1;
@@ -66,6 +70,7 @@ $(document).ready(function () {
 	StartQLearning();
 	bindings();
 	$("#statusIA").text(IAActive ? "Ativado" : "Desativado");
+	$("#explorationRate").val(explorationRate);
 });
 
 function bindings() {
@@ -96,6 +101,10 @@ function bindings() {
 	$("#btnStartStopIA").on("click", function () {
 		IAActive = !IAActive;
 		$("#statusIA").text(IAActive ? "Ativado" : "Desativado");
+	});
+
+	$("#explorationRate").on("change", function () {
+		PerceptronQLearning.epsilon = parseFloat($(this).val());
 	});
 }
 
@@ -272,19 +281,12 @@ function draw() {
 	for (const pixel of player.body) {
 		drawPixel(pixel.x, pixel.y, "black");
 	}
+	
+	drawPixel(player.x, player.y, "white") 
 
 	drawPixel(food.x, food.y, "red");
 }
 function drawPixel(x, y, color) {
 	var html = "<div style='position:absolute;width:10px;height:10px;background-color:" + color + ";left:" + x + "px;top:" + y + "px;'></div>";
 	$("#main").append(html);
-}
-
-function compareArrays(arr1, arr2) {
-	for (let i = 0; i < arr1.length; i++) {
-		if (arr1[i] != arr2[i]) {
-			return false;
-		}
-	}
-	return true;
 }

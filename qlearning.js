@@ -1,12 +1,15 @@
 var PerceptronQLearning = null;
 
+var explorationRate = 0.4;
+
+
 class QLearningAgent {
 	constructor(states, actions, alpha, gamma, epsilon) {
 		this.states = states;
 		this.actions = actions;
 		this.alpha = alpha; // Learning rate
 		this.gamma = gamma; // Discount factor
-		this.epsilon = epsilon; //  Exploration rate
+		this.epsilon = explorationRate; //  Exploration rate
 
 		this.qTable = {};
 
@@ -88,6 +91,5 @@ class QLearningAgent {
 
 function StartQLearning() {
 	var states = [player.x - food.x, player.y - food.y, map.x - player.x, map.y - player.y];
-
-	PerceptronQLearning = new QLearningAgent(states, ["up", "down", "left", "right"], 0.3, 0.2, 0.3);
+	PerceptronQLearning = new QLearningAgent(states, ["up", "down", "left", "right"], 0.2, 0.2, 0.4);
 }
