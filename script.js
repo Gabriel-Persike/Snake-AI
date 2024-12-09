@@ -17,7 +17,7 @@ var player = {
 			y: 100,
 		},
 	],
-};	
+};
 
 var food = {
 	x: 70,
@@ -27,6 +27,7 @@ var food = {
 var IAActive = true;
 
 var intervalClock = null;
+var intervalClockUpdateUI = null;
 
 function IAQlearning() {
 	var state = getState();
@@ -42,23 +43,33 @@ function IAQlearning() {
 		player.direction = "right";
 	}
 
-	return {state, action};
+	return { state, action };
 }
-function nextState(state, action, colision, gotFood){
+function nextState(state, action, colision, gotFood) {
 	var nextState = getState();
 
 	var reward = 0;
 	if (gotFood) {
 		reward = 10;
-		PerceptronQLearning.epsilon *= 0.6;
-	}
-	else{
+
+		if (PerceptronQLearning.epsilon <= 1 && PerceptronQLearning.epsilon >= 0) {
+			PerceptronQLearning.epsilon *= 0.6;
+		}
+	} else {
 		// reward = -0.000000000000001;
-		if (PerceptronQLearning.epsilon < 1)  {
-			PerceptronQLearning.epsilon *= 1.001; 
+		if (PerceptronQLearning.epsilon <= 1 && PerceptronQLearning.epsilon >= 0) {
+			PerceptronQLearning.epsilon *= 1.01;
 		}
 	}
 
+	if (PerceptronQLearning.epsilon > 1) {
+		PerceptronQLearning.epsilon = 1;
+	}
+	else if (PerceptronQLearning.epsilon < 0) {
+		PerceptronQLearning.epsilon = 0;
+	}
+
+	
 	if (colision) {
 		reward = -1;
 	}
@@ -115,6 +126,13 @@ function startStop() {
 		clearInterval(intervalClock);
 		intervalClock = null;
 	}
+
+	if (intervalClockUpdateUI == null) {
+		intervalClockUpdateUI = setInterval(updateUI, 2000);
+	} else {
+		clearInterval(intervalClockUpdateUI);
+		intervalClockUpdateUI = null;
+	}
 }
 
 function IALinearRegretion() {
@@ -157,23 +175,18 @@ function clock() {
 	}
 	player.moves++;
 	draw();
-
 }
 
-function getState(){
+function getState() {
 	var x = player.x - food.x;
 	x = x < 0 ? -1 : x > 0 ? 1 : 0;
 	var y = player.y - food.y;
 	y = y < 0 ? -1 : y > 0 ? 1 : 0;
 
-	var Mapx = player.x >= (map.x - 10) ? 1 : map.x - player.x >= (map.x - 10) ? -1 : 0;
-	var Mapy = player.y >= (map.y - 10) ? 1 : map.y - player.y >= (map.y-10)  ? -1 : 0;
+	var Mapx = player.x >= map.x - 10 ? 1 : map.x - player.x >= map.x - 10 ? -1 : 0;
+	var Mapy = player.y >= map.y - 10 ? 1 : map.y - player.y >= map.y - 10 ? -1 : 0;
 
-	var nextState = [
-		x,y,
-		Mapx,
-		Mapy
-	];
+	var nextState = [x, y, Mapx, Mapy];
 
 	return nextState.join(",");
 }
@@ -195,7 +208,7 @@ function checkFood() {
 	function getUnOcupiedPixels() {
 		var pixels = [];
 		for (let i = 30; i < map.x - 30; i += 10) {
-			for (let j = 30; j < map.y -30; j += 10) {
+			for (let j = 30; j < map.y - 30; j += 10) {
 				var ocupied = false;
 				for (const pixel of player.body) {
 					if (pixel.x == i && pixel.y == j) {
@@ -211,15 +224,15 @@ function checkFood() {
 		return pixels;
 	}
 }
-function checkColision(){
+function checkColision() {
 	if (player.x < 0 || player.x >= map.x || player.y < 0 || player.y >= map.y) {
 		// clearInterval(intervalClock);
 		// intervalClock = null;
 		// alert("Game Over");
-	
+
 		if (highest < player.points) {
 			highest = player.points;
-			$("#textHigh").html(highest);			
+			$("#textHigh").html(highest);
 		}
 
 		if (player.moves > highestMoves) {
@@ -232,7 +245,7 @@ function checkColision(){
 			x: 50,
 			y: 100,
 			direction: "right",
-			moves:0,
+			moves: 0,
 			body: [
 				{
 					id: 0,
@@ -281,12 +294,43 @@ function draw() {
 	for (const pixel of player.body) {
 		drawPixel(pixel.x, pixel.y, "black");
 	}
-	
-	drawPixel(player.x, player.y, "white") 
+
+	drawPixel(player.x, player.y, "white");
 
 	drawPixel(food.x, food.y, "red");
 }
 function drawPixel(x, y, color) {
 	var html = "<div style='position:absolute;width:10px;height:10px;background-color:" + color + ";left:" + x + "px;top:" + y + "px;'></div>";
 	$("#main").append(html);
+}
+
+function updateUI() {
+	updateQTablehtml();
+	$("#explorationRate").val(PerceptronQLearning.epsilon);
+}
+
+function updateQTablehtml() {
+	var html = "";
+
+	// loop through the qtable and append to htlm
+
+	for (const state in PerceptronQLearning.qTable) {
+		console.log(state);
+
+		html += "<tr>";
+
+		html += "<td>";
+		html += state;
+		html += "</td>";
+
+		for (const action in PerceptronQLearning.qTable[state]) {
+			var qValue = PerceptronQLearning.qTable[state][action];
+			html += "<td>";
+			html += qValue;
+			html += "</td>";
+		}
+		html += "</tr>";
+	}
+
+	$("#qtable>table>tbody").html(html);
 }

@@ -91,5 +91,5 @@ class QLearningAgent {
 
 function StartQLearning() {
 	var states = [player.x - food.x, player.y - food.y, map.x - player.x, map.y - player.y];
-	PerceptronQLearning = new QLearningAgent(states, ["up", "down", "left", "right"], 0.2, 0.2, 0.4);
+	PerceptronQLearning = new QLearningAgent([], ["up", "down", "left", "right"], 0.2, 0.2, 0.4);
 }
