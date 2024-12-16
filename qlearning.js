@@ -2,7 +2,6 @@ var PerceptronQLearning = null;
 
 var explorationRate = 0.4;
 
-
 class QLearningAgent {
 	constructor(states, actions, alpha, gamma, epsilon) {
 		this.states = states;
@@ -22,20 +21,19 @@ class QLearningAgent {
 	}
 
 	chooseAction(state) {
-            var maxQ = this.qTable[state];
-            if (maxQ && maxQ != {}) {
-			    var maxQ = Math.max(...Object.values(this.qTable[state]));
-                if (true) {
-                    if (Math.random() < this.epsilon) {
-                        return this.actions[Math.floor(Math.random() * this.actions.length)];
-                    }
-                }
+		var maxQ = this.qTable[state];
+		if (maxQ && maxQ != {}) {
+			var maxQ = Math.max(...Object.values(this.qTable[state]));
+			if (true) {
+				if (Math.random() < this.epsilon) {
+					return this.actions[Math.floor(Math.random() * this.actions.length)];
+				}
+			}
 
-                return Object.keys(this.qTable[state]).find((key) => this.qTable[state][key] === maxQ);
-            }else{
-                return this.actions[Math.floor(Math.random() * this.actions.length)];
-            }
-		
+			return Object.keys(this.qTable[state]).find((key) => this.qTable[state][key] === maxQ);
+		} else {
+			return this.actions[Math.floor(Math.random() * this.actions.length)];
+		}
 	}
 
 	updateQValue(state, action, reward, nextState) {
@@ -46,31 +44,28 @@ class QLearningAgent {
 			maxQNext = 0;
 		}
 
-        if (isNaN(maxQNext)) {
-            maxQNext = 0;
-        }
+		if (isNaN(maxQNext)) {
+			maxQNext = 0;
+		}
 
-        var qValue = null;
-        if (!this.qTable[state] || !this.qTable[state][action]) {
-            qValue = 0;   
-            if(!this.qTable[state])
-            this.qTable[state] = {};
+		var qValue = null;
+		if (!this.qTable[state] || !this.qTable[state][action]) {
+			qValue = 0;
+			if (!this.qTable[state]) this.qTable[state] = {};
 
-            // for (const action of this.actions) {
-                this.qTable[state][action] = 0;
-            // }
-        }
-        else{
-            qValue = this.qTable[state][action];
-        }
-    
-        var newValue = this.alpha * (reward + this.gamma * maxQNext - qValue);
-        if (reward <= -1) {
-            console.error(state, action, this.alpha, reward, this.gamma, maxQNext, qValue, newValue);
-        }
-        else if(reward>=1){
-            console.log(state, action, this.alpha, reward, this.gamma, maxQNext, qValue, newValue);
-        }
+			// for (const action of this.actions) {
+			this.qTable[state][action] = 0;
+			// }
+		} else {
+			qValue = this.qTable[state][action];
+		}
+
+		var newValue = this.alpha * (reward + this.gamma * maxQNext - qValue);
+		if (reward <= -1) {
+			console.error(state, action, this.alpha, reward, this.gamma, maxQNext, qValue, newValue);
+		} else if (reward >= 1) {
+			console.log(state, action, this.alpha, reward, this.gamma, maxQNext, qValue, newValue);
+		}
 		this.qTable[state][action] += newValue;
 	}
 
